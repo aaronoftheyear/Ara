@@ -28,9 +28,10 @@ dist-ssr
 .env.local
 .env.production
 
-# API Keys
+# API Keys and service account credentials
 *.key
 groq-api-key.txt
+keys/
 
 # Extracted files
 extracted-app/
