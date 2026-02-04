@@ -1,36 +1,42 @@
 // Serverless proxy for MyAnimeList API to avoid CORS and third-party proxy 403s.
 // Forwards GET requests to api.myanimelist.net with X-MAL-CLIENT-ID.
-// Usage: GET /api/mal-proxy?path=/v2/users/{username}/animelist?fields=...
+// Usage: GET /api/mal-proxy?path=https://api.myanimelist.net/v2/...
 // Header: X-MAL-CLIENT-ID (or set MAL_CLIENT_ID in server env)
 
 const MAL_BASE = 'https://api.myanimelist.net';
 
-function setCorsHeaders(res) {
-  if (res && typeof res.setHeader === 'function') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'X-MAL-CLIENT-ID');
-    res.setHeader('Cache-Control', 'no-store');
-  }
-}
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'X-MAL-CLIENT-ID',
+  'Cache-Control': 'no-store',
+};
 
 module.exports = async (req, res) => {
-  try {
-    setCorsHeaders(res);
-    const method = (req && req.method || '').toUpperCase();
-    if (method === 'OPTIONS') {
-      res.status(200).end();
-      return;
-    }
+  // OPTIONS preflight: respond immediately with 204 No Content (standard for CORS preflight)
+  const method = (req && req.method || '').toUpperCase();
+  if (method === 'OPTIONS') {
+    res.writeHead(204, {
+      ...CORS_HEADERS,
+      'Content-Length': '0',
+    });
+    res.end();
+    return;
+  }
 
-    if (method !== 'GET') {
-      res.status(405).json({ error: 'Method not allowed' });
-      return;
-    }
+  // Set CORS on all other responses
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => {
+    if (res.setHeader) res.setHeader(k, v);
+  });
+
+  if (method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   const path = (req.query && req.query.path) || '';
   if (!path || typeof path !== 'string') {
-    res.status(400).json({ error: 'Query parameter "path" is required (e.g. /v2/users/username/animelist?fields=...)' });
+    res.status(400).json({ error: 'Query parameter "path" is required' });
     return;
   }
 
@@ -57,20 +63,12 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', contentType);
 
     if (!response.ok) {
-      return res.status(response.status).send(body || response.statusText);
+      res.status(response.status).send(body || response.statusText);
+      return;
     }
-
-    return res.status(200).send(body);
+    res.status(200).send(body);
   } catch (err) {
     console.error('MAL proxy error:', err);
-    setCorsHeaders(res);
     res.status(502).json({ error: 'Proxy request failed', message: err.message });
-  }
-  } catch (handlerErr) {
-    console.error('MAL proxy handler error:', handlerErr);
-    if (res && typeof res.setHeader === 'function') {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.status(500).end();
-    }
   }
 };
