@@ -6,10 +6,7 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "functions": {
-    "api/mal-proxy.js": { "runtime": "nodejs20.x" }
-  }
+  ]
 }
 
 
