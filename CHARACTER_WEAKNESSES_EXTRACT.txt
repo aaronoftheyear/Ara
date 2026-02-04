@@ -1,0 +1,72 @@
+EXTRACTING ALL CHARACTER WEAKNESSES FROM characterExpertise.ts
+
+YUJI:
+- sliceOfLife → Marin/Shinpachi
+- romance, ecchi, harem, fanservice, eroge, adultGames, magicalGirl, shojo, josei → Marin
+- isekai, gaming → Ishigami
+- mecha → Kinta  
+- music, idol → Shinpachi
+
+MARIN:
+- isekai → Ishigami
+- fantasy, supernatural → Rikka
+- horror, psychological → Kyoutarou
+- sports → Kanbaru
+- military, mecha → Kinta
+- gaming, virtualReality, seinen → Ishigami
+
+SHINPACHI:
+- battleShonen → Yuji (back)
+- fanservice, ecchi, harem, eroge, adultGames → Rudeus
+- mecha, magicalGirl → Marin/Kinta
+
+RIKKA:
+- battleShonen → Yuji (back)
+- eroge, adultGames → Rudeus/Daru
+- mecha → Kinta
+- seinen → Ishigami (back)
+
+ISHIGAMI:
+- ecchi, harem → Rudeus
+- mecha → Kinta
+
+KINTA:
+- ecchi, harem, eroge, adultGames → Daru
+- idol, music → Shinpachi (back)
+
+DARU:
+- romance, manga, lightNovels → Kakashi
+
+KYOTARO (ichikawa):
+- mecha, sciFi → Kinta (back)
+- sports, idol → Kanbaru/Shinpachi
+- ecchi, harem, eroge, adultGames → Rudeus
+- isekai → Rudeus
+- cyberpunk → Daru
+
+RUDEUS:
+- sliceOfLife, idol → Shinpachi (back)
+- horror, psychological → Ainz
+
+AINZ:
+- sliceOfLife, idol → Shinpachi (back)
+- fanservice, ecchi, sports, josei → Kanbaru
+- harem → Rudeus (back)
+
+KANBARU:
+- battleShonen → Yuji (back)
+- mecha → Kinta (back)
+- sciFi, cyberpunk, eroge, adultGames → Daru
+- military → Ainz (back)
+
+BAKUGO:
+(Need to check)
+
+VELDORA:
+- drama, romance, psychological → Kakashi (manga)
+- mecha → Kinta (special)
+- Many anime weaknesses → various back referrals
+
+KAKASHI:
+- action, adventure, shonen, battleShonen, isekai, fantasy → Veldora (manga)
+- Many anime weaknesses → various back referrals

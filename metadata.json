@@ -1,0 +1,5 @@
+{
+  "name": "Ara - Anime Recommendation Assistant",
+  "description": "AI-powered anime recommendation assistant with access to your complete MyAnimeList data. Analyzes your watch history, ratings, and preferences to provide personalized anime recommendations. Features real-time data access, preference analysis, and intelligent filtering to avoid already-watched anime.",
+  "requestFramePermissions": []
+}
