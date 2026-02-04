@@ -34,3 +34,7 @@ groq-api-key.txt
 
 # Extracted files
 extracted-app/
+
+# Large binaries / archives (avoid push failures)
+ngrok.zip
+*.zip
