@@ -5,33 +5,45 @@
 
 const MAL_BASE = 'https://api.myanimelist.net';
 
+function setCorsHeaders(res) {
+  if (res && typeof res.setHeader === 'function') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'X-MAL-CLIENT-ID');
+    res.setHeader('Cache-Control', 'no-store');
+  }
+}
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-MAL-CLIENT-ID');
-  res.setHeader('Cache-Control', 'no-store');
+  try {
+    setCorsHeaders(res);
+    const method = (req && req.method || '').toUpperCase();
+    if (method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    if (method !== 'GET') {
+      res.status(405).json({ error: 'Method not allowed' });
+      return;
+    }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const path = req.query.path;
+  const path = (req.query && req.query.path) || '';
   if (!path || typeof path !== 'string') {
-    return res.status(400).json({ error: 'Query parameter "path" is required (e.g. /v2/users/username/animelist?fields=...)' });
+    res.status(400).json({ error: 'Query parameter "path" is required (e.g. /v2/users/username/animelist?fields=...)' });
+    return;
   }
 
-  const clientId = req.headers['x-mal-client-id'] || process.env.MAL_CLIENT_ID;
+  const clientId = (req.headers && req.headers['x-mal-client-id']) || process.env.MAL_CLIENT_ID;
   if (!clientId) {
-    return res.status(400).json({ error: 'X-MAL-CLIENT-ID header or MAL_CLIENT_ID env is required' });
+    res.status(400).json({ error: 'X-MAL-CLIENT-ID header or MAL_CLIENT_ID env is required' });
+    return;
   }
 
   const url = path.startsWith('http') ? path : MAL_BASE + (path.startsWith('/') ? path : '/' + path);
   if (!url.startsWith(MAL_BASE)) {
-    return res.status(400).json({ error: 'path must target api.myanimelist.net only' });
+    res.status(400).json({ error: 'path must target api.myanimelist.net only' });
+    return;
   }
 
   try {
@@ -51,6 +63,14 @@ module.exports = async (req, res) => {
     return res.status(200).send(body);
   } catch (err) {
     console.error('MAL proxy error:', err);
-    return res.status(502).json({ error: 'Proxy request failed', message: err.message });
+    setCorsHeaders(res);
+    res.status(502).json({ error: 'Proxy request failed', message: err.message });
+  }
+  } catch (handlerErr) {
+    console.error('MAL proxy handler error:', handlerErr);
+    if (res && typeof res.setHeader === 'function') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.status(500).end();
+    }
   }
 };
