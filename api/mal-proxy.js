@@ -1,34 +1,15 @@
 // Serverless proxy for MyAnimeList API to avoid CORS and third-party proxy 403s.
-// Forwards GET requests to api.myanimelist.net with X-MAL-CLIENT-ID.
+// Uses MAL_CLIENT_ID from Vercel env only (no header from client) so the browser sends a simple GET and no preflight.
 // Usage: GET /api/mal-proxy?path=https://api.myanimelist.net/v2/...
-// Header: X-MAL-CLIENT-ID (or set MAL_CLIENT_ID in server env)
+// Set MAL_CLIENT_ID in Vercel → Project → Settings → Environment Variables.
 
 const MAL_BASE = 'https://api.myanimelist.net';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'X-MAL-CLIENT-ID',
-  'Cache-Control': 'no-store',
-};
-
 module.exports = async (req, res) => {
-  // OPTIONS preflight: respond immediately with 204 No Content (standard for CORS preflight)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store');
+
   const method = (req && req.method || '').toUpperCase();
-  if (method === 'OPTIONS') {
-    res.writeHead(204, {
-      ...CORS_HEADERS,
-      'Content-Length': '0',
-    });
-    res.end();
-    return;
-  }
-
-  // Set CORS on all other responses
-  Object.entries(CORS_HEADERS).forEach(([k, v]) => {
-    if (res.setHeader) res.setHeader(k, v);
-  });
-
   if (method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -40,9 +21,9 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const clientId = (req.headers && req.headers['x-mal-client-id']) || process.env.MAL_CLIENT_ID;
+  const clientId = process.env.MAL_CLIENT_ID;
   if (!clientId) {
-    res.status(400).json({ error: 'X-MAL-CLIENT-ID header or MAL_CLIENT_ID env is required' });
+    res.status(500).json({ error: 'MAL_CLIENT_ID not set. Add it in Vercel → Project → Settings → Environment Variables.' });
     return;
   }
 

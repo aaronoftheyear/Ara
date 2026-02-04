@@ -22,14 +22,17 @@ const mapMalStatus = (status: string): AnimeEntry['status'] => {
 const MAL_BASE = 'https://api.myanimelist.net';
 
 // Use proxy: 1) VITE_MAL_PROXY_URL (for static hosts like one.com), 2) same-origin /api/mal-proxy (Vercel), 3) CORS fallbacks.
+// When using our proxy we send NO custom headers so the request is a "simple" GET and the browser does not send a preflight (avoids OPTIONS 500).
+// The proxy uses MAL_CLIENT_ID from server env (set in Vercel). Fallbacks still send X-MAL-CLIENT-ID.
 async function fetchWithMalProxy(url: string, clientId: string): Promise<Response> {
-    const headers = { 'X-MAL-CLIENT-ID': clientId };
     const proxyBase =
         (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_MAL_PROXY_URL) ||
         (typeof window !== 'undefined' ? window.location.origin : '');
     const proxyUrl = `${proxyBase.replace(/\/$/, '')}/api/mal-proxy?path=${encodeURIComponent(url)}`;
-    let res = await fetch(proxyUrl, { headers });
+    // No custom headers → simple GET → no preflight
+    let res = await fetch(proxyUrl);
     if (res.ok || res.status === 400) return res;
+    const headers = { 'X-MAL-CLIENT-ID': clientId };
     // Fallback 1: cors-anywhere (forwards headers; may require one-time "request access" in browser)
     try {
         res = await fetch('https://cors-anywhere.herokuapp.com/' + url, { headers });
